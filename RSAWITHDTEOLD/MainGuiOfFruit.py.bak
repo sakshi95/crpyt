@@ -1,0 +1,109 @@
+import Tkinter
+import base64
+from RSA import decrypt
+from RSA import encrypt
+import tkMessageBox
+
+class crypt_mod(Tkinter.Tk):
+    def __init__(self, parent):
+        Tkinter.Tk.__init__(self, parent)
+        self.parent = parent
+        self.initialize()
+
+    def initialize(self):
+        self.grid()
+
+        plain_label = Tkinter.Label(text='Plain Text:')
+        plain_label.grid(column=0, row=0, sticky='E')
+
+        self.ptxt = Tkinter.StringVar()
+        self.plain_text = Tkinter.Entry(self, textvariable=self.ptxt, width=50)
+        self.plain_text.grid(column=1, row=0, padx=5, pady=5)
+        self.plain_text.bind("<Return>", self.encrypt)
+
+        self.enc_button = Tkinter.Button(self, text='Encrypt', command=self.encrypt, relief='groove')
+        self.enc_button.grid(column=2, row=0, padx=5, pady=5)
+
+        #self.dec_button = Tkinter.Button(self, text='Decrypt', command=self.decrypt, relief='groove')
+        #self.dec_button.grid(column=2, row=1, padx=5, pady=5)
+
+        plain_label = Tkinter.Label(text='Encrypted Text:')
+        plain_label.grid(column=0, row=1, sticky='w')
+
+        self.etxt = Tkinter.StringVar()
+        self.e_text = Tkinter.Entry(self, textvariable=self.etxt, width=20)
+        self.e_text.grid(column=1, row=1, padx=2, pady=2,sticky='W')
+
+        #private key textbox
+        plain_label = Tkinter.Label(text='Enter Private Key:')
+        plain_label.grid(column=1, row=1)
+
+        self.prk = Tkinter.StringVar()
+        self.pr_text = Tkinter.Entry(self, textvariable=self.prk, width=17)
+        self.pr_text.grid(row=1,columnspan=2, padx=2, pady=2,sticky='E')
+
+        self.dec_button = Tkinter.Button(self, text='Decrypt', command=self.decrypt, relief='groove')
+        self.dec_button.grid(column=2, row=1, padx=5, pady=5,sticky='E')
+
+
+
+        self.clear_button = Tkinter.Button(self, text='Clear All', command=self.clear_all, relief='groove')
+        self.clear_button.grid(column=1, row=2, padx=5, pady=5)
+
+        self.htxt = Tkinter.StringVar()
+        self.history = Tkinter.Text(width=50, height=10, wrap='word', spacing1=2, font=('courier',8), state='disabled')
+        self.history.grid(column=0, row=3, columnspan=3, padx=5, pady=5)
+
+        self.clear_history_button = Tkinter.Button(self, text='Clear History', command=self.clear_history, relief='groove')
+        self.clear_history_button.grid(column=1, row=4, padx=5, pady=5)
+
+    def encrypt(self):
+        if not self.ptxt.get():
+
+            tkMessageBox.showinfo(message="Don't leave Empty")
+            return
+
+        self.etxt.set(encrypt((str(self.ptxt.get()))))
+        self.history.config(state='normal')
+        self.history.insert(Tkinter.END, 'encrypt:\n' + (str(self.etxt.get())) + '\n')
+        self.history.config(state='disabled')
+        self.history.see(Tkinter.END)
+        #print "encrypt click!"
+
+    def decrypt(self):
+        if not self.ptxt.get():
+            tkMessageBox.showinfo(message="U should Ente Plain Text And Click On Encrypt Widget")
+            return
+        if not self.etxt.get():
+            tkMessageBox.showinfo(message="U Should Click On Encrypt Widget")
+            return
+        if not self.prk.get():
+            tkMessageBox.showinfo(message="Enter The Private Key")
+            return
+        privatekey=str(self.prk.get())
+
+        #self.ptxt.set(decrypt(str(self.etxt.get()),privatekey))
+        self.history.config(state='normal')
+        self.history.insert(Tkinter.END, 'decrypt:\n' + decrypt(str(self.etxt.get()),privatekey) + '\n')
+        self.history.config(state='disabled')
+        self.history.see(Tkinter.END)
+        #print "decrypt click!"
+
+    def clear_all(self):
+        self.prk.set('')
+        self.etxt.set('')
+        self.ptxt.set('')
+        
+	 
+		 
+
+    def clear_history(self):
+        self.history.config(state='normal')
+        self.history.delete(0.0, Tkinter.END)
+        self.history.config(state='disabled')
+        pass
+
+if __name__ == "__main__":
+    app = crypt_mod(None)
+    app.title('Honey Encryption(RSA)')
+    app.mainloop()
